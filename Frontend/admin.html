@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ShortLink Admin</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0b1120; color:#e5e7eb; font-family:'Poppins',sans-serif; }
+
+/* NAVBAR */
+nav { position:fixed; top:0; width:100%; height:70px; background:#020617; display:flex; justify-content:center; align-items:center; box-shadow:0 8px 25px rgba(0,0,0,0.7); z-index:100; }
+nav button { background:none; border:none; color:#cbd5f5; font-size:14px; cursor:pointer; letter-spacing:1px; }
+nav button:hover { color:#f8c8dc; }
+nav button.active { color:#38bdf8; font-weight:600; }
+
+/* SECTIONS / CENTERING */
+.section { min-height:100vh; padding-top:90px; display:flex; justify-content:center; align-items:center; }
+.center { width:100%; display:flex; justify-content:center; }
+
+/* CARD */
+.card { background:#020617; padding:30px; width:700px; border-radius:14px; box-shadow:0 15px 40px rgba(56,189,248,0.15); }
+.card h2 { text-align:center; font-size:24px; margin-bottom:10px; }
+.card p { text-align:center; font-size:14px; color:#94a3b8; margin-bottom:18px; }
+
+/* BUTTON */
+button.action { width:100%; margin-top:18px; padding:11px; border:none; border-radius:8px; background:#38bdf8; color:#020617; font-weight:600; cursor:pointer; }
+button.action:hover { background:#0ea5e9; }
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; margin-top:15px; font-size:13px; }
+th, td { padding:8px; border-bottom:1px solid #475569; text-align:left; }
+th { background:#0f172a; }
+.info { margin-top:15px; font-size:15px; line-height:1.7; color:#94a3b8; text-align:center; }
+
+/* SCROLLABLE TABLE */
+.table-container { max-height:260px; overflow:auto; }
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+  <button class="active">ADMIN</button>
+</nav>
+
+<!-- ADMIN SECTION -->
+<div class="section">
+  <div class="center">
+    <div class="card">
+      <h2>Admin Analytics</h2>
+      <p>View all short links and usage data</p>
+
+      <button class="action" onclick="loadAnalytics()">Load Analytics</button>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Target URL</th>
+              <th>Clicks</th>
+              <th>Last Accessed</th>
+            </tr>
+          </thead>
+          <tbody id="analyticsTable"></tbody>
+        </table>
+      </div>
+
+      <div class="info">
+        Admin data is fetched via API Gateway.<br>
+        Authentication can be added using AWS Cognito in production.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://unguyzcou7.execute-api.us-east-1.amazonaws.com";
+
+async function loadAnalytics() {
+  const table = document.getElementById("analyticsTable");
+  table.innerHTML = "";
+  try {
+    const res = await fetch(`${API_BASE}/admin/links`);
+    const data = await res.json();
+    data.forEach(item => {
+      table.innerHTML += `
+        <tr>
+          <td>${item.code}</td>
+          <td>${item.target_url}</td>
+          <td>${item.click_count}</td>
+          <td>${item.last_accessed || "-"}</td>
+        </tr>`;
+    });
+  } catch(err) {
+    table.innerHTML = "<tr><td colspan='4'>Failed to load data</td></tr>";
+  }
+}
+</script>
+
+</body>
+</html>
